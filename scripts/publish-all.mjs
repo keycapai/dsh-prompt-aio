@@ -69,7 +69,12 @@ for (const name of ORDER) {
 
   try {
     const tarball = run('npm', ['pack', '--silent'], dir);
-    run('npm', ['publish', tarball, '--access', 'public', '--provenance'], dir);
+    // --provenance asks npm to mint a sigstore attestation from the CI identity.
+    // There is no such identity on a laptop, and npm refuses the whole publish
+    // with EUSAGE ("provider: null"), so it is added only under GitHub Actions.
+    const flags = ['publish', tarball, '--access', 'public'];
+    if (process.env.GITHUB_ACTIONS === 'true') flags.push('--provenance');
+    run('npm', flags, dir);
     console.log(`${name}@${version}  published`);
   } catch (error) {
     console.error(`${name}@${version}  FAILED`);
