@@ -25,8 +25,30 @@ const ORDER = [
 
 const publish = process.argv.includes('--publish');
 
+/**
+ * `--otp=<code>` forwards a one-time password straight to npm.
+ *
+ * The interactive prompt (see runInteractive) is the friendly path, but it only
+ * works when this script owns a TTY. Passing the code explicitly is the escape
+ * hatch for CI shells, editors' task runners, or any wrapper that does not.
+ */
+const otpArg = process.argv.find((arg) => arg.startsWith('--otp='));
+const otp = otpArg === undefined ? undefined : otpArg.slice('--otp='.length);
+
 function run(command, args, cwd) {
   return execFileSync(command, args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+}
+
+/**
+ * Run a command attached to this terminal.
+ *
+ * `npm publish` may need to PROMPT — a 2FA one-time password, a login, a
+ * confirmation. With a piped stdin npm sees no TTY, cannot ask, and dies with
+ * EOTP before the user ever sees a chance to type the code. Handing the child
+ * our own stdio is what makes the interactive path work at all.
+ */
+function runInteractive(command, args, cwd) {
+  execFileSync(command, args, { cwd, stdio: 'inherit' });
 }
 
 function versionOf(dir) {
@@ -74,7 +96,8 @@ for (const name of ORDER) {
     // with EUSAGE ("provider: null"), so it is added only under GitHub Actions.
     const flags = ['publish', tarball, '--access', 'public'];
     if (process.env.GITHUB_ACTIONS === 'true') flags.push('--provenance');
-    run('npm', flags, dir);
+    if (otp !== undefined && otp.length > 0) flags.push(`--otp=${otp}`);
+    runInteractive('npm', flags, dir);
     console.log(`${name}@${version}  published`);
   } catch (error) {
     console.error(`${name}@${version}  FAILED`);
