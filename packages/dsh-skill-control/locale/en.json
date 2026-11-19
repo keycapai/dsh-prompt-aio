@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Skill management",
+    "description": "Manage skill catalog visibility: full descriptions, name-only entries, hidden or disabled skills, with skill_search and skill_catalog for discovery."
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Skill 管理",
+    "description": "管理 Skill 目录的可见性：完整介绍、只显示名字、隐藏或禁用，并提供 skill_search / skill_catalog 搜索发现能力。"
+  }
+}

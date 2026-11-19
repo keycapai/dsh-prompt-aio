@@ -1,0 +1,88 @@
+name: Release
+
+# Publishing is driven by tags, never by a branch push.
+#
+# The publish order matters: the three control plugins go first, then the meta
+# package that depends on them. scripts/publish-all.mjs encodes that order and
+# is the single place it lives.
+#
+# ── Authentication ──────────────────────────────────────────────────────────
+# Primary path is npm TRUSTED PUBLISHING (OIDC): no long-lived token to leak.
+# Configure it once per package on npmjs.com:
+#   package -> Settings -> Trusted publishing -> GitHub Actions
+#     Organization: keycapai
+#     Repository:   dsh-prompt-aio
+#     Workflow:     release.yml
+# Falls back to an NPM_TOKEN secret if trusted publishing is not set up.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Actually publish to npm (unchecked = dry run)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Ensure npm supports trusted publishing
+        run: |
+          npm install -g npm@latest
+          npm --version
+
+      - name: Install workspace dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run every package's tests
+        run: npm test
+
+      - name: Check that the tag matches the meta package version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          PKG_VERSION="$(node -p "require('./packages/dsh-prompt-aio/package.json').version")"
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          echo "meta package: $PKG_VERSION"
+          echo "tag:          $TAG_VERSION"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match dsh-prompt-aio version $PKG_VERSION"
+            exit 1
+          fi
+
+      - name: Dry run (pack every package, publish nothing)
+        if: github.event_name == 'workflow_dispatch' && inputs.publish != true
+        run: node scripts/publish-all.mjs
+
+      - name: Publish in dependency order
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.publish == true
+        run: node scripts/publish-all.mjs --publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create the GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true

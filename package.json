@@ -1,0 +1,24 @@
+{
+  "name": "dsh-prompt-aio-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Monorepo for the DSH Prompt AIO bundle and its three control plugins.",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "npm run test --workspaces --if-present",
+    "test:one": "npm run test --workspace",
+    "pack:all": "node scripts/pack-all.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "author": "keycapai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keycapai/dsh-prompt-aio.git"
+  }
+}

@@ -1,0 +1,62 @@
+# dsh-prompt-aio — META bundle.
+# Installs three independent control plugins as one logical unit.
+# Each sub-package carries its OWN client (id = package name), so all three
+# settings cards register independently — no merged-client slot collisions.
+#   install -> plugin_manager install_bundle dsh-prompt-aio
+#   remove  -> plugin_manager remove_bundle dsh-prompt-aio
+- insert:
+    # 1) Tool surface control (Optimized T2: bulk MCP & rare tools hidden, fallback stub)
+    - id: tool-control-row
+      name: dsh-tool-control
+      config:
+        enabled: true
+        deferMcpPrefixes:
+          - { match: "mcp__", mode: hidden }
+        deferNames:
+          - { match: workflow, mode: stub }
+          - { match: plugin_manager, mode: stub }
+          - { match: replay_trajectory, mode: hidden }
+          - { match: start_recording, mode: hidden }
+          - { match: stop_recording, mode: hidden }
+        deferPatterns:
+          - { match: "^cordis_", mode: hidden }
+        passthrough:
+          - tool_search
+          - tool_catalog
+          - read
+          - write
+          - edit
+          - bash
+          - glob
+          - grep
+          - ask_user_question
+          - todo_write
+          - run_code
+        minSchemaBytes: 1500
+        fallbackMode: stub
+        toolOrder: []
+        toolModes: {}
+        promptNotice: true
+    # 2) System prompt control (Optimized P2: disable non-essential metadata context, keep safety & time)
+    - id: prompt-control-row
+      name: dsh-prompt-control
+      config:
+        enabled: true
+        overrides: {}
+        presetOverrides: {}
+        insertions: []
+        sectionOrder: []
+        contextInjections:
+          suppressOptional: false
+          disabledContexts:
+            - harness:source
+          disabledKinds: []
+    # 3) Skill catalog control (Optimized S2: name-only fallback + 120-char cap for full skills)
+    - id: skill-control-row
+      name: dsh-skill-control
+      config:
+        enabled: true
+        skillModes: {}
+        fallbackMode: name
+        catalogDescriptionMaxLength: 120
+        promptNotice: true

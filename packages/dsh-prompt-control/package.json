@@ -1,0 +1,65 @@
+{
+  "name": "dsh-prompt-control",
+  "version": "0.6.0",
+  "description": "系统提示词管理：预设管理、来源分组、在线编辑、任意位置插入规则、实时预览。",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/*.js",
+    "locale/*.json",
+    "skills/**",
+    "cordis.patch.yml",
+    "icon.svg",
+    "README.md"
+  ],
+  "icon": "./icon.svg",
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.2"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-settings-general",
+        "@deepseek-ai/dsh-client-ui-plugin-manager"
+      ]
+    }
+  },
+  "author": "keycapai",
+  "homepage": "https://github.com/keycapai/dsh-prompt-aio/tree/main/packages/dsh-prompt-control#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keycapai/dsh-prompt-aio.git",
+    "directory": "packages/dsh-prompt-control"
+  },
+  "bugs": {
+    "url": "https://github.com/keycapai/dsh-prompt-aio/issues"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "prompt-control",
+    "system-prompt",
+    "prompt-management",
+    "keycapai"
+  ],
+  "scripts": {
+    "test": "node --test --test-force-exit test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

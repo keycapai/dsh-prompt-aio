@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "System prompt control",
+    "description": "Manage system prompts across presets, identify source origins, edit prompt sections, and insert custom rules at any position."
+  }
+}

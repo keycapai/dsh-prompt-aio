@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "工具管理",
+    "description": "精简模型可见的工具上下文：按规则精简工具声明（精简/API延载/隐藏），并通过 tool_search/tool_catalog 按需检索与召回。"
+  }
+}

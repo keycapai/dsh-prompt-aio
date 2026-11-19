@@ -1,0 +1,122 @@
+# dsh-tool-control bundle patch.
+#
+# A bundle is a package that ships this file: the loader applies it as a patch
+# layer, so the row below is what installing the bundle actually mounts.
+#
+# This row is ENABLED by default and carries the full deferral config, so the
+# whole lifecycle lives in one place:
+#
+#   install  ->  plugin_manager install_bundle dsh-tool-control  (asks first)
+#   tune     ->  edit the config below and restart
+#   disable  ->  plugin_manager set_plugin tool-control-row false
+#                (config stays; the tool surface returns to fully expanded)
+#   remove   ->  plugin_manager remove_bundle dsh-tool-control
+#                (the loader drops this whole patch layer — nothing left behind)
+#
+# Never hand-copy this row into the profile's own cordis.patch.yml: the bundle
+# row is already patched in by the loader, and a duplicate mount in the profile
+# layer would reference a module the manager may remove out from under it —
+# exactly the dangling-reference failure mode that broke chat startup once.
+#
+# On ordering: a patch row can only APPEND to the entry list, so this plugin
+# cannot be positioned ahead of a provider a bundle declared earlier — and the
+# Cua MCP provider is declared by a bundle. That no longer matters at all:
+# reduction is applied to the ASSEMBLED tool list on every request
+# (`system-prompt/assemble`), so every tool is covered whether it registered
+# before or after this plugin activated. `test/order.mjs` pins that behaviour.
+- insert:
+    - id: tool-control-row
+      name: "dsh-tool-control"
+      config:
+        enabled: true
+        # EVERY RULE CARRIES ITS OWN MODE. There is no global default: a rule
+        # written as a bare string is rejected with a warning, because it has
+        # no mode to carry and silently inheriting one made the settings page
+        # look like it was ignoring changes.
+        #
+        # The five modes:
+        #   full     — sent unchanged (not controlled at all)
+        #   name     — full schema + deferLoading flag; smallest wire cost, but
+        #              ONLY the DeepSeek Messages adapter honours it (other
+        #              adapters strip the flag and silently send full schemas)
+        #   stub     — name + a one-line description + a pointer to tool_search;
+        #              provider-independent. ~83% reduction on the Cua toolset.
+        #   hidden   — omitted from the model's tool list ENTIRELY (not even the
+        #              name is sent), but still REGISTERED and fully callable:
+        #              the model finds it via tool_search and reads its purpose
+        #              and arguments on demand.
+        #   disabled — NOT REGISTERED AT ALL: the model cannot see it, cannot
+        #              call it, and tool_search/tool_catalog do not report it.
+        #              Strictly stronger than `hidden`; use it for tools that
+        #              should not exist in this deployment at all.
+        #
+        # Every mode changes only what the model READS, except `disabled` which
+        # also removes the registration. Execution and argument validation
+        # always run the provider's original definition.
+        #
+        # Prefix-based rule: every `mcp__*` tool (the 58 Cua Driver tools were
+        # 77% of all tool schema bytes).
+        deferMcpPrefixes:
+          - { match: "mcp__", mode: stub }
+        # Low-frequency, high-volume tools named individually.
+        deferNames:
+          - { match: workflow, mode: stub }
+          - { match: plugin_manager, mode: stub }
+          - { match: replay_trajectory, mode: stub }
+          - { match: start_recording, mode: stub }
+          - { match: stop_recording, mode: stub }
+        # Whole families by regular expression.
+        deferPatterns:
+          - { match: "^cordis_", mode: stub }
+        # Never deferred, whatever the rules above match: the search pair
+        # itself, plus the file/shell/question primitives every turn needs.
+        passthrough:
+          - tool_search
+          - tool_catalog
+          - read
+          - write
+          - edit
+          - bash
+          - glob
+          - grep
+          - ask_user_question
+          - todo_write
+          - run_code
+        # >0: also defer any tool whose schema exceeds this many bytes.
+        minSchemaBytes: 0
+        # Mode for a tool that matches NO rule above — including tools from
+        # plugins installed later, which is what previously left other plugins'
+        # tools completely unfiltered.
+        #   full (default) — leave unmatched tools resident; nothing is hidden
+        #                    by surprise on an untouched installation.
+        #   stub / name / hidden — apply that mode to every unmatched tool.
+        # Prefer the settings page's per-tool list for finer control.
+        fallbackMode: full
+        # Per-tool overrides written by the settings page's three-state picker:
+        #   toolModes:
+        #     read: full              # keep resident
+        #     workflow: stub          # name + one-line summary
+        #     mcp__heavy__tool: hidden # omit from the model's list entirely
+        # An entry here ALWAYS wins over the rules above, so an explicit choice
+        # survives a wildcard like `deferMcpPrefixes: ["mcp__"]`.
+        # Manual PROMPT ORDER: listed tools come first in this order, the rest
+        # follow name-sorted. Not a filter — it cannot un-hide a tool. The
+        # settings card writes this when you use the ↑/↓ buttons.
+        toolOrder: []
+        toolModes: {}
+        # Explicit source attribution for the settings card's "source plugin"
+        # grouping. Two paths cover the common cases automatically: the register
+        # hook reports the caller's fiber name, and a tool declared by an
+        # installed plugin package is matched through that package's code. Use
+        # this map when a row still reads "built-in" but a plugin really does
+        # provide it — e.g. web_search, whose PROVIDER is taken over by
+        # dsh-free-search at runtime while the tool itself stays in dsh-tool-web:
+        #   sourceOverrides:
+        #     web_search: dsh-free-search
+        sourceOverrides: {}
+        # Append a prompt notice: states that the tool list is filtered, names
+        # the reduced tools, and tells the model that every one of them —
+        # including name-only (`hidden`) tools — remains callable, reading
+        # withheld descriptions and arguments via tool_search details:true.
+        # Omitted entirely when nothing is reduced.
+        promptNotice: true

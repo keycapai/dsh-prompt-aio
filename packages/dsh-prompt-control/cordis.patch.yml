@@ -1,0 +1,21 @@
+# dsh-prompt-control bundle patch.
+#
+# A bundle is a package that ships this file: the loader applies it as a patch
+# layer, so the row below is what installing the bundle actually mounts.
+#
+# This row is ENABLED by default and manages prompt sections dynamically:
+#
+#   install  ->  plugin_manager install_bundle dsh-prompt-control
+#   disable  ->  plugin_manager set_plugin prompt-control-row false
+#   remove   ->  plugin_manager remove_bundle dsh-prompt-control
+#
+- insert:
+    - id: prompt-control-row
+      name: "dsh-prompt-control"
+      config:
+        enabled: true
+        overrides: {}
+        presetOverrides: {}
+        insertions: []
+        sectionOrder: []
+        contextInjections: {}

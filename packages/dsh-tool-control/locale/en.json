@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Tool control",
+    "description": "Keeps the model tool surface small: reduces matched tools prompt surface (stub / API-defer / hidden) and adds tool_search/tool_catalog to read them back on demand."
+  }
+}
