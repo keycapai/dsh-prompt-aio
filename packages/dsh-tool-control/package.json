@@ -1,6 +1,6 @@
 {
   "name": "dsh-tool-control",
-  "version": "1.8.3",
+  "version": "1.8.4",
   "description": "工具面控制：批量隐藏 MCP 与低频工具、按需 stub 展开，控制工具 schema 的上下文占用。",
   "type": "module",
   "main": "lib/index.js",

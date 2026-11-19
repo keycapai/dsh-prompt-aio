@@ -1,6 +1,6 @@
 {
   "name": "dsh-prompt-aio",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "DSH Prompt AIO — meta bundle installing prompt_control, skill_control and tool_control as one unit. Four npm packages, one-command install.",
   "type": "module",
   "main": "./lib/index.js",
@@ -26,9 +26,9 @@
     "tool-control"
   ],
   "dependencies": {
-    "dsh-prompt-control": "^0.6.0",
-    "dsh-skill-control": "^0.1.0",
-    "dsh-tool-control": "^1.8.3"
+    "dsh-prompt-control": "^0.6.1",
+    "dsh-skill-control": "^0.1.1",
+    "dsh-tool-control": "^1.8.4"
   },
   "dsh": {
     "bundle": {
