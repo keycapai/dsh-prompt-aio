@@ -23,7 +23,8 @@
     "dsh-bundle",
     "prompt-control",
     "skill-control",
-    "tool-control"
+    "tool-control",
+    "keycapai"
   ],
   "dependencies": {
     "dsh-prompt-control": "^0.6.1",
@@ -37,5 +38,18 @@
   },
   "scripts": {
     "test": "node --check lib/index.js"
+  },
+  "author": "keycapai",
+  "homepage": "https://github.com/keycapai/dsh-prompt-aio#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keycapai/dsh-prompt-aio.git",
+    "directory": "packages/dsh-prompt-aio"
+  },
+  "bugs": {
+    "url": "https://github.com/keycapai/dsh-prompt-aio/issues"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
